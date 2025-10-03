@@ -3,7 +3,6 @@ import TasksPage from './pages/TasksPage';
 import BoardsPage from './pages/BoardsPage';
 import Layout from './components/Layout';
 import { useEffect } from 'react';
-import { driver } from 'driver.js';
 import './styles/driver.css';
 import { ensureBoardsSeeded, getBoards, storageKeyForColumns, storageKeyForTasks } from './lib/boards';
 import { ensureWorkspacesSeeded, getWorkspaces } from './lib/workspaces';
@@ -11,10 +10,6 @@ import { ensureWorkspacesSeeded, getWorkspaces } from './lib/workspaces';
 function App() {
   const navigate = useNavigate();
   const location = useLocation();
-  useEffect(() => {
-    const driverObj = driver();
-    driverObj.drive();
-  }, []);
 
   useEffect(() => {
     const firstKey = 'app_first_open_done';

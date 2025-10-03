@@ -105,7 +105,7 @@ export default function BoardsPage() {
                           ]))
                         }
                       } catch {}
-                      navigate(`/w/${ws?.id}/boards`)
+                      navigate(`/w/${ws?.id}/boards/${board.id}`)
                     }}
                     className="flex items-center gap-3 w-full text-left"
                   >
