@@ -2,21 +2,29 @@ import { motion } from 'framer-motion'
 import { useDroppable } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useTranslation } from 'react-i18next'
-import { Plus } from 'lucide-react'
+import { Plus, Pencil, Trash2 } from 'lucide-react'
 import type { Task, KanbanColumn as KanbanColumnType } from '../types/task'
 import TaskCard from './TaskCard.tsx'
 import { Shimmer } from './ui/shimmer'
+import { useState } from 'react'
 
 interface KanbanColumnProps {
   column: KanbanColumnType
   tasks: Task[]
+  onCreateTask?: (status: Task['status']) => void
+  onEditTask?: (task: Task) => void
+  onDeleteTask?: (taskId: string) => void
+  onRenameColumn?: (title: string) => void
+  onDeleteColumn?: () => void
 }
 
-const KanbanColumn = ({ column, tasks }: KanbanColumnProps) => {
+const KanbanColumn = ({ column, tasks, onCreateTask, onEditTask, onDeleteTask, onRenameColumn, onDeleteColumn }: KanbanColumnProps) => {
   const { t } = useTranslation()
   const { setNodeRef, isOver } = useDroppable({
     id: column.id,
   })
+  const [isEditingTitle, setIsEditingTitle] = useState(false)
+  const [titleDraft, setTitleDraft] = useState(column.title)
 
   const getColumnColor = (status: Task['status']) => {
     switch (status) {
@@ -44,14 +52,12 @@ const KanbanColumn = ({ column, tasks }: KanbanColumnProps) => {
     }
   }
 
-  const getStatusTitle = (status: Task['status']) => {
-    return t(`columns.${status === 'in-progress' ? 'inProgress' : status}`)
-  }
+  const getStatusTitle = () => column.title
 
   return (
     <motion.div 
       className={`
-        rounded-xl border-2 border-dashed p-4 md:p-6 min-h-[500px] transition-all duration-300
+        rounded-xl border-2 border-dashed p-4 md:p-6 min-h-[500px] w-full transition-all duration-300
         ${getColumnColor(column.status)}
         ${isOver ? 'border-solid scale-[1.02] shadow-lg' : ''}
       `}
@@ -67,30 +73,64 @@ const KanbanColumn = ({ column, tasks }: KanbanColumnProps) => {
         transition={{ delay: 0.2 }}
       >
         <Shimmer>
-          <h3 className={`font-bold text-lg md:text-xl ${getHeaderColor(column.status)}`}>
-            {getStatusTitle(column.status)}
-          </h3>
+          {isEditingTitle ? (
+            <form
+              onSubmit={(e) => { e.preventDefault(); onRenameColumn?.(titleDraft.trim() || column.title); setIsEditingTitle(false) }}
+            >
+              <input
+                value={titleDraft}
+                onChange={(e) => setTitleDraft(e.target.value)}
+                className="px-2 py-1 rounded border bg-white dark:bg-slate-800"
+                autoFocus
+                onBlur={() => setIsEditingTitle(false)}
+              />
+            </form>
+          ) : (
+            <h3
+              onDoubleClick={() => setIsEditingTitle(true)}
+              className={`font-bold text-lg md:text-xl ${getHeaderColor(column.status)}`}
+            >
+              {getStatusTitle()}
+            </h3>
+          )}
         </Shimmer>
         
         <div className="flex items-center gap-2">
-          <motion.span 
-            className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm text-slate-700 dark:text-slate-300 px-3 py-1 rounded-full text-sm font-bold shadow-sm border border-slate-200/50 dark:border-slate-700/50"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
-            key={tasks.length}
-          >
-            {tasks.length}
-          </motion.span>
+       
           
           <motion.button
+            onClick={() => onCreateTask?.(column.status)}
             className="p-1.5 rounded-lg bg-white/50 dark:bg-slate-800/50 hover:bg-white/80 dark:hover:bg-slate-700/80 text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-all duration-200 border border-slate-200/50 dark:border-slate-700/50"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            title="Adicionar tarefa"
+            title="Adicionar"
           >
             <Plus className="w-4 h-4" />
           </motion.button>
+
+          {onRenameColumn && (
+            <motion.button
+              onClick={() => setIsEditingTitle(true)}
+              className="p-1.5 rounded-lg hover:bg-white/80 dark:hover:bg-slate-700/80 text-slate-600 dark:text-slate-400 transition-all duration-200"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              title="Renomear lista"
+            >
+              <Pencil className="w-4 h-4" />
+            </motion.button>
+          )}
+
+          {onDeleteColumn && (
+            <motion.button
+              onClick={onDeleteColumn}
+              className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 transition-all duration-200"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              title="Remover lista"
+            >
+              <Trash2 className="w-4 h-4" />
+            </motion.button>
+          )}
         </div>
       </motion.div>
 
@@ -121,7 +161,13 @@ const KanbanColumn = ({ column, tasks }: KanbanColumnProps) => {
             </motion.div>
           ) : (
             tasks.map((task, index) => (
-              <TaskCard key={task.id} task={task} index={index} />
+              <TaskCard 
+                key={task.id} 
+                task={task} 
+                index={index}
+                onEdit={onEditTask}
+                onDelete={onDeleteTask}
+              />
             ))
           )}
         </SortableContext>

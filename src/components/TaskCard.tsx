@@ -2,17 +2,20 @@ import { motion } from 'framer-motion'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { useTranslation } from 'react-i18next'
-import { Link, AlertCircle, CheckCircle, Clock } from 'lucide-react'
+import { Link, AlertCircle, CheckCircle, Clock, Edit2, Trash2, Calendar, User } from 'lucide-react'
 import type { Task } from '../types/task'
 import { AnimatedCard } from './ui/animated-card'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
 
 interface TaskCardProps {
   task: Task
   isDragging?: boolean
   index?: number
+  onEdit?: (task: Task) => void
+  onDelete?: (taskId: string) => void
 }
 
-const TaskCard = ({ task, isDragging = false, index = 0 }: TaskCardProps) => {
+const TaskCard = ({ task, isDragging = false, index = 0, onEdit, onDelete }: TaskCardProps) => {
   const { t } = useTranslation()
   const {
     attributes,
@@ -31,13 +34,13 @@ const TaskCard = ({ task, isDragging = false, index = 0 }: TaskCardProps) => {
   const getPriorityColor = (priority: Task['priority']) => {
     switch (priority) {
       case 'high':
-        return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border-red-200 dark:border-red-800'
+        return 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300 border-red-200 dark:border-red-800'
       case 'medium':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800'
+        return 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800'
       case 'low':
-        return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border-green-200 dark:border-green-800'
+        return 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300 border-green-200 dark:border-green-800'
       default:
-        return 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+        return 'bg-slate-50 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700'
     }
   }
 
@@ -58,101 +61,184 @@ const TaskCard = ({ task, isDragging = false, index = 0 }: TaskCardProps) => {
     return t(`priority.${priority}`)
   }
 
+  const truncateText = (text: string, maxLength: number) => {
+    if (text.length <= maxLength) return text
+    return text.substring(0, maxLength) + '...'
+  }
+
+  const TITLE_MAX_LENGTH = 50
+  const DESCRIPTION_MAX_LENGTH = 120
+
   return (
-    <motion.div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      layout
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ 
-        duration: 0.3, 
-        delay: index * 0.05,
-        layout: { duration: 0.3 }
-      }}
-      whileHover={!isDragging && !isSortableDragging ? { 
-        scale: 1.02, 
-        y: -2,
-        transition: { duration: 0.2 }
-      } : {}}
-      whileTap={!isDragging && !isSortableDragging ? { scale: 0.98 } : {}}
-      className="cursor-grab active:cursor-grabbing"
-    >
-      <AnimatedCard
-        className={`
-          p-4 border-l-4 border-l-blue-500 dark:border-l-blue-400
-          ${isDragging || isSortableDragging ? 'opacity-70 rotate-3 scale-105 shadow-xl z-50' : ''}
-          transition-all duration-200
-        `}
-        isDragging={isDragging || isSortableDragging}
+    <TooltipProvider>
+      <motion.div
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...listeners}
+        layout
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ 
+          duration: 0.3, 
+          delay: index * 0.05,
+          layout: { duration: 0.3 }
+        }}
+        whileHover={!isDragging && !isSortableDragging ? { 
+          scale: 1.02, 
+          y: -2,
+          transition: { duration: 0.2 }
+        } : {}}
+        whileTap={!isDragging && !isSortableDragging ? { scale: 0.98 } : {}}
+        className="cursor-grab active:cursor-grabbing"
       >
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-start gap-2 flex-1">
-            {getStatusIcon(task.status)}
-            <h4 className="font-semibold text-slate-900 dark:text-white leading-tight text-sm">
-              {task.title}
-            </h4>
-          </div>
-          <motion.span 
-            className={`px-2 py-1 rounded-full text-xs font-medium border ${getPriorityColor(task.priority)}`}
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            {getPriorityLabel(task.priority)}
-          </motion.span>
-        </div>
-        
-        {task.description && (
-          <motion.p 
-            className="text-sm text-slate-600 dark:text-slate-300 mb-3 leading-relaxed"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-          >
-            {task.description}
-          </motion.p>
-        )}
-
-        {task.dependencies && task.dependencies.length > 0 && (
-          <motion.div 
-            className="flex items-center gap-2 mt-3 px-2 py-1 bg-slate-50 dark:bg-slate-700/50 rounded-md"
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            <Link className="w-3 h-3 text-slate-500" />
-            <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">
-              {task.dependencies.length} {task.dependencies.length === 1 ? t('tasks.dependencies') : t('tasks.dependenciesPlural')}
-            </span>
-          </motion.div>
-        )}
-
-        {/* Progress indicator based on status */}
-        <motion.div 
-          className="mt-3 h-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden"
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ delay: 0.5 }}
+        <AnimatedCard
+          className={`
+            group relative p-4 border-l-4 border-l-blue-500 dark:border-l-blue-400
+            ${isDragging || isSortableDragging ? 'opacity-70 rotate-3 scale-105 shadow-xl z-50' : ''}
+            transition-all duration-200 rounded-xl shadow-sm hover:shadow-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 min-h-[140px] overflow-hidden
+            hover:border-blue-300 dark:hover:border-blue-600
+          `}
+          isDragging={isDragging || isSortableDragging}
         >
-          <motion.div
-            className={`h-full rounded-full ${
-              task.status === 'done' ? 'bg-green-500' :
-              task.status === 'in-progress' ? 'bg-yellow-500' : 'bg-red-500'
-            }`}
-            initial={{ width: 0 }}
-            animate={{ 
-              width: task.status === 'done' ? '100%' : 
-                     task.status === 'in-progress' ? '60%' : '20%' 
-            }}
-            transition={{ delay: 0.6, duration: 0.8 }}
-          />
-        </motion.div>
-      </AnimatedCard>
-    </motion.div>
+          {/* Header with status and actions */}
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex items-start gap-2 flex-1 min-w-0">
+              {getStatusIcon(task.status)}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <h4 className="font-semibold text-slate-900 dark:text-white leading-tight text-sm truncate" title={task.title}>
+                    {truncateText(task.title, TITLE_MAX_LENGTH)}
+                  </h4>
+                </TooltipTrigger>
+                {task.title.length > TITLE_MAX_LENGTH && (
+                  <TooltipContent side="top" className="max-w-xs">
+                    <p>{task.title}</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </div>
+            
+            <div className="flex items-center gap-1 ml-2">
+              <motion.span 
+                className={`px-2 py-1 rounded-full text-xs font-medium border ${getPriorityColor(task.priority)}`}
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2 }}
+              >
+                {getPriorityLabel(task.priority)}
+              </motion.span>
+              
+              {/* Actions Menu */}
+              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                {onEdit && (
+                  <motion.button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onEdit(task)
+                    }}
+                    className="p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    title="Editar"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                  </motion.button>
+                )}
+                {onDelete && (
+                  <motion.button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onDelete(task.id)
+                    }}
+                    className="p-1.5 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 text-slate-500 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    title="Deletar"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </motion.button>
+                )}
+              </div>
+            </div>
+          </div>
+          
+          {/* Description */}
+          {task.description && (
+            <motion.div 
+              className="mb-3"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <p 
+                    className="text-sm text-slate-600 dark:text-slate-300 leading-5 line-clamp-2"
+                    title={task.description}
+                  >
+                    {truncateText(task.description, DESCRIPTION_MAX_LENGTH)}
+                  </p>
+                </TooltipTrigger>
+                {task.description.length > DESCRIPTION_MAX_LENGTH && (
+                  <TooltipContent side="top" className="max-w-xs">
+                    <p>{task.description}</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </motion.div>
+          )}
+
+          {/* Dependencies */}
+          {task.dependencies && task.dependencies.length > 0 && (
+            <motion.div 
+              className="flex items-center gap-2 mb-3 px-2 py-1 bg-slate-50 dark:bg-slate-700/50 rounded-md"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <Link className="w-3 h-3 text-slate-500" />
+              <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">
+                {task.dependencies.length} dependência{task.dependencies.length !== 1 ? 's' : ''}
+              </span>
+            </motion.div>
+          )}
+
+          {/* Footer with metadata */}
+          <div className="flex items-center justify-between mt-auto pt-2 border-t border-slate-100 dark:border-slate-700">
+            <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+              <Calendar className="w-3 h-3" />
+              <span>Hoje</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <User className="w-3 h-3 text-slate-400" />
+            </div>
+          </div>
+
+          {/* Progress indicator based on status */}
+          <motion.div 
+            className="absolute bottom-0 left-0 right-0 h-1 bg-slate-200 dark:bg-slate-700 rounded-b-xl overflow-hidden"
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ delay: 0.5 }}
+          >
+            <motion.div
+              className={`h-full rounded-full ${
+                task.status === 'done' ? 'bg-green-500' :
+                task.status === 'in-progress' ? 'bg-yellow-500' : 'bg-red-500'
+              }`}
+              initial={{ width: 0 }}
+              animate={{ 
+                width: task.status === 'done' ? '100%' : 
+                       task.status === 'in-progress' ? '60%' : '20%' 
+              }}
+              transition={{ delay: 0.6, duration: 0.8 }}
+            />
+          </motion.div>
+        </AnimatedCard>
+      </motion.div>
+    </TooltipProvider>
   )
 }
 

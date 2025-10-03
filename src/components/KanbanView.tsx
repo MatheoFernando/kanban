@@ -10,20 +10,28 @@ import type {
   DragOverEvent,
   DragStartEvent,
 } from '@dnd-kit/core'
-import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { arrayMove } from '@dnd-kit/sortable'
 import { useState } from 'react'
-import type { Task } from '../types/task'
-import { kanbanColumns } from '../data/mockTasks'
-import KanbanColumn from './KanbanColumn.tsx'
+import type { Task, KanbanColumn } from '../types/task'
+import KanbanColumnComponent from './KanbanColumn.tsx'
 import TaskCard from './TaskCard.tsx'
+import { AddColumnCard } from './AddColumnCard'
+import { kanbanColumns } from '../data/mockTasks'
 
 interface KanbanViewProps {
   tasks: Task[]
+  columns: KanbanColumn[]
   onUpdateTask: (task: Task) => void
   onUpdateTasks: (tasks: Task[]) => void
+  onDeleteTask: (taskId: string) => void
+  onCreateTask?: (status: Task['status']) => void
+  onEditTask?: (task: Task) => void
+  onAddColumn?: (title: string) => void
+  onRenameColumn?: (id: string, title: string) => void
+  onDeleteColumn?: (id: string) => void
 }
 
-const KanbanView = ({ tasks, onUpdateTask, onUpdateTasks }: KanbanViewProps) => {
+const KanbanView = ({ tasks, columns, onUpdateTask, onUpdateTasks, onDeleteTask, onCreateTask, onEditTask, onAddColumn, onRenameColumn, onDeleteColumn }: KanbanViewProps) => {
   const [activeTask, setActiveTask] = useState<Task | null>(null)
   
   const sensors = useSensors(
@@ -91,7 +99,7 @@ const KanbanView = ({ tasks, onUpdateTask, onUpdateTasks }: KanbanViewProps) => 
     }
   }
 
-  const getTasksByStatus = (status: Task['status']) => {
+  const getTasksByStatus = (status: string) => {
     return tasks.filter(task => task.status === status)
   }
 
@@ -102,14 +110,25 @@ const KanbanView = ({ tasks, onUpdateTask, onUpdateTasks }: KanbanViewProps) => 
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
-        {kanbanColumns.map(column => (
-          <KanbanColumn
-            key={column.id}
-            column={column}
-            tasks={getTasksByStatus(column.status)}
-          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6 pb-4">
+        {columns.map(column => (
+          <div key={column.id} className="w-full">
+            <KanbanColumnComponent
+              column={column}
+              tasks={getTasksByStatus(column.status)}
+              onDeleteTask={onDeleteTask}
+              onCreateTask={onCreateTask}
+              onEditTask={onEditTask}
+              onRenameColumn={onRenameColumn ? (title) => onRenameColumn(column.id, title) : undefined}
+              onDeleteColumn={onDeleteColumn ? () => onDeleteColumn(column.id) : undefined}
+            />
+          </div>
         ))}
+            {onAddColumn && (
+              <div className="w-full">
+                <AddColumnCard onAddColumn={onAddColumn} />
+              </div>
+            )}
       </div>
 
       <DragOverlay>
