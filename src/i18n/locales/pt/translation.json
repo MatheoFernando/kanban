@@ -1,0 +1,111 @@
+{
+  "appName": "Kanban",
+  "switchToLight": "Alternar para modo claro",
+  "switchToDark": "Alternar para modo escuro",
+  "boards": "Quadros",
+  "searchBoardsAndTasks": "Buscar quadros e tarefas...",
+  "create": "Criar",
+  "createBoard": "Criar novo quadro",
+  "boardName": "Nome do quadro",
+  "boardDescription": "Descrição (opcional)",
+  "boardIcon": "Ícone:",
+  "createWorkspace": "Criar novo workspace",
+  "workspaceName": "Nome do workspace",
+  "deleteWorkspace": "Remover workspace?",
+  "deleteWorkspaceConfirmation": "\"{{name}}\" será removido. Os quadros serão movidos para outro workspace.",
+  "loading": "Carregando...",
+  "error": "Erro",
+  "save": "Salvar",
+  "cancel": "Cancelar",
+  "edit": "Editar",
+  "delete": "Excluir",
+  "add": "Adicionar",
+  "rename": "Renomear",
+  "remove": "Remover",
+  "header": {
+    "switchToLight": "Alternar para modo claro",
+    "switchToDark": "Alternar para modo escuro",
+    "boards": "Quadros",
+    "searchBoardsAndTasks": "Buscar quadros e tarefas...",
+    "create": "Criar",
+    "openMenu": "Abrir menu",
+    "closeMenu": "Fechar menu",
+    "navigation": "Navegação"
+  },
+  "navigation": {
+    "home": "Home",
+    "createWorkspace": "Criar workspace",
+    "workspaces": "Workspaces",
+    "noWorkspaces": "Sem workspaces"
+  },
+  "views": {
+    "kanbanView": "Kanban",
+    "flowView": "Fluxo"
+  },
+  "priority": {
+    "high": "Alta",
+    "medium": "Média",
+    "low": "Baixa"
+  },
+  "status": {
+    "todo": "A Fazer",
+    "in-progress": "Em Progresso",
+    "done": "Concluído"
+  },
+  "columns": {
+    "todo": "A Fazer",
+    "inProgress": "Em Progresso",
+    "done": "Concluído"
+  },
+  "tasks": {
+    "dependencies": "dependência",
+    "dependenciesPlural": "dependências",
+    "noDependencies": "Sem dependências",
+    "noDueDate": "Sem data"
+  },
+  "modals": {
+    "createBoard": "Criar novo quadro",
+    "boardName": "Nome do quadro",
+    "boardDescription": "Descrição (opcional)",
+    "boardIcon": "Ícone:",
+    "createWorkspace": "Criar novo workspace",
+    "workspaceName": "Nome do workspace",
+    "deleteWorkspace": "Remover workspace?",
+    "deleteWorkspaceConfirmation": "\"{{name}}\" será removido. Os quadros serão movidos para outro workspace.",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "add": "Adicionar",
+    "rename": "Renomear",
+    "remove": "Remover"
+  },
+  "common": {
+    "loading": "Carregando...",
+    "error": "Erro"
+  },
+  "languages": {
+    "pt": "Português",
+    "en": "English"
+  },
+  "searchDialog": {
+    "placeholder": "Buscar quadros e tarefas...",
+    "nothingFound": "Nada encontrado",
+    "boardsHeading": "Quadros",
+    "tasksHeading": "Tarefas"
+  },
+  "tour": {
+    "start": "Bem-vindo! Vamos conhecer o aplicativo.",
+    "logo": "Clique para voltar aos quadros.",
+    "menuButton": "Abra o menu para navegar no mobile.",
+    "navigation": "Aqui você encontra a navegação.",
+    "home": "Atalho rápido para a página de quadros.",
+    "createWorkspace": "Crie um novo workspace por aqui.",
+    "language": "Altere o idioma aqui.",
+    "theme": "Alterne entre claro e escuro.",
+    "createBoard": "Crie novos quadros aqui.",
+    "search": "Pesquise quadros e tarefas por aqui."
+  }
+}
+
+

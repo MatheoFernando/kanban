@@ -6,6 +6,7 @@ export interface Task {
   priority: 'low' | 'medium' | 'high';
   dependencies?: string[]; 
   position?: { x: number; y: number }; 
+  dueDate?: string; 
 }
 
 export interface KanbanColumn {

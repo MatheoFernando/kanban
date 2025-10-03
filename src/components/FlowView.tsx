@@ -1,9 +1,9 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   ReactFlow,
   addEdge,
-  useNodesState,
-  useEdgesState,
+  applyNodeChanges,
+  applyEdgeChanges,
   Controls,
   MiniMap,
   Background,
@@ -30,39 +30,57 @@ const nodeTypes: NodeTypes = {
 }
 
 const FlowView = ({ tasks, onUpdateTask }: FlowViewProps) => {
-  const initialNodes: Node[] = useMemo(() => {
-    return tasks.map(task => ({
+  const computeNodes = useCallback((): Node[] => (
+    tasks.map(task => ({
       id: task.id,
       type: 'taskNode',
       position: task.position || { x: Math.random() * 500, y: Math.random() * 300 },
       data: { task },
     }))
-  }, [tasks])
+  ), [tasks])
 
-  const initialEdges: Edge[] = useMemo(() => {
+  const computeEdges = useCallback((): Edge[] => {
     const edges: Edge[] = []
+    const ids = new Set(tasks.map(t => t.id))
     tasks.forEach(task => {
       if (task.dependencies) {
         task.dependencies.forEach(depId => {
-          edges.push({
-            id: `${depId}-${task.id}`,
-            source: depId,
-            target: task.id,
-            animated: true,
-            style: { stroke: '#64748b', strokeWidth: 2 },
-            markerEnd: {
-              type: 'arrowclosed',
-              color: '#64748b',
-            },
-          })
+          if (ids.has(depId) && ids.has(task.id) && depId !== task.id) {
+            edges.push({
+              id: `${depId}-${task.id}`,
+              source: depId,
+              target: task.id,
+              animated: true,
+              style: { stroke: '#64748b', strokeWidth: 2 },
+              markerEnd: { type: 'arrowclosed', color: '#64748b' },
+            })
+          }
         })
       }
     })
     return edges
   }, [tasks])
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
+  const [nodes, setNodes] = useState<Node[]>(computeNodes)
+  const [edges, setEdges] = useState<Edge[]>(computeEdges)
+
+  useEffect(() => {
+    setNodes(prev => {
+      // Preserve existing positions if ids match, otherwise regenerate
+      const next = computeNodes()
+      const posMap = new Map(prev.map(n => [n.id, n.position]))
+      return next.map(n => ({ ...n, position: posMap.get(n.id) || n.position }))
+    })
+    setEdges(computeEdges())
+  }, [computeNodes, computeEdges])
+
+  const onNodesChange = useCallback((changes: any) => {
+    setNodes(ns => applyNodeChanges(changes, ns))
+  }, [])
+
+  const onEdgesChange = useCallback((changes: any) => {
+    setEdges(es => applyEdgeChanges(changes, es))
+  }, [])
 
   const onConnect = useCallback(
     (params: Connection) => {
@@ -105,7 +123,7 @@ const FlowView = ({ tasks, onUpdateTask }: FlowViewProps) => {
   )
 
   return (
-    <div className="h-[500px] sm:h-[600px] w-full bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+    <div className="h-[400px] sm:h-[500px] w-full bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -114,9 +132,10 @@ const FlowView = ({ tasks, onUpdateTask }: FlowViewProps) => {
         onConnect={onConnect}
         onNodeDragStop={onNodeDragStop}
         nodeTypes={nodeTypes}
+        defaultEdgeOptions={{ animated: true, style: { stroke: '#64748b', strokeWidth: 2 }, markerEnd: { type: 'arrowclosed', color: '#64748b' } as any }}
         fitView
         attributionPosition="bottom-left"
-        className="bg-slate-50 dark:bg-slate-800"
+        className="bg-slate-50 dark:bg-slate-800 [&_.react-flow__node]:rounded-lg [&_.react-flow__edge-path]:stroke-slate-500"
       >
         <Controls className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700" />
         <MiniMap 

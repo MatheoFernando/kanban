@@ -1,164 +1,192 @@
-import { motion, AnimatePresence } from 'framer-motion'
-import { useState, useEffect } from 'react'
-import { Kanban, GitBranch, Filter, Search, Plus, Users, Calendar, BarChart3 } from 'lucide-react'
-import KanbanView from '../components/KanbanView.tsx'
-import FlowView from '../components/FlowView.tsx'
-import { TaskModal } from '../components/TaskModal'
-import type { Task, ViewMode, KanbanColumn } from '../types/task'
-import { mockTasks, kanbanColumns } from '../data/mockTasks'
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { Kanban, GitBranch, ArrowLeft } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
+import KanbanView from '../components/KanbanView.tsx';
+import FlowView from '../components/FlowView.tsx';
+import { driver } from 'driver.js';
+import 'driver.js/dist/driver.css';
+import { TaskModal } from '../components/TaskModal';
+import type { Task, ViewMode, KanbanColumn } from '../types/task';
+const defaultColumns: KanbanColumn[] = [
+  { id: 'todo', title: 'A Fazer', status: 'todo' },
+  { id: 'in-progress', title: 'Em Progresso', status: 'in-progress' },
+  { id: 'done', title: 'Concluído', status: 'done' },
+];
+import { getBoardById } from '../lib/boards';
+import { getWorkspaceById } from '../lib/workspaces';
 
 const TasksPage = () => {
-  const [tasks, setTasks] = useState<Task[]>([])
-  const [columns, setColumns] = useState<KanbanColumn[]>(kanbanColumns)
-  const [currentView, setCurrentView] = useState<ViewMode>('kanban')
-  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
-  const [editingTask, setEditingTask] = useState<Task | null>(null)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedGroup, setSelectedGroup] = useState('all')
-
- 
+  const { boardId } = useParams();
+  const navigate = useNavigate();
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [columns, setColumns] = useState<KanbanColumn[]>(defaultColumns);
+  const [currentView, setCurrentView] = useState<ViewMode>('flow');
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedGroup] = useState('all');
+  const board = boardId ? getBoardById(boardId) : undefined;
+  const workspaceName = board?.workspaceId ? getWorkspaceById(board.workspaceId)?.name : undefined;
 
   const filteredTasks = tasks.filter(task => {
     const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         task.description?.toLowerCase().includes(searchQuery.toLowerCase())
-    
-    if (selectedGroup === 'all') return matchesSearch
+                         task.description?.toLowerCase().includes(searchQuery.toLowerCase());
+
+    if (selectedGroup === 'all') return matchesSearch;
     if (['high', 'medium', 'low'].includes(selectedGroup)) {
-      return matchesSearch && task.priority === selectedGroup
+      return matchesSearch && task.priority === selectedGroup;
     }
-    return matchesSearch && task.status === selectedGroup
-  })
+    return matchesSearch && task.status === selectedGroup;
+  });
 
   useEffect(() => {
-    const savedTasks = localStorage.getItem('kanban-tasks')
-    const savedColumns = localStorage.getItem('kanban-columns')
-    
-    if (savedTasks) {
-      setTasks(JSON.parse(savedTasks))
+    if (!boardId) {
+      navigate('/boards', { replace: true });
+      return;
+    }
+    const board = getBoardById(boardId);
+    if (!board) {
+      navigate('/boards', { replace: true });
+      return;
+    }
+    const tasksKey = `kanban-tasks:${boardId}`;
+    const colsKey = `kanban-columns:${boardId}`;
+    const savedTasks = localStorage.getItem(tasksKey);
+    const savedColumns = localStorage.getItem(colsKey);
+    const parsedTasks = savedTasks ? JSON.parse(savedTasks) : undefined;
+    if (parsedTasks && Array.isArray(parsedTasks) && parsedTasks.length > 0) {
+      setTasks(parsedTasks);
+    } else if (board.name.toLowerCase() === 'teste') {
+      setTasks([
+        { id: 't1', title: 'Configurar projeto', status: 'todo', priority: 'high', description: 'Inicializar repositório e configurações básicas.' },
+        { id: 't2', title: 'Criar componentes UI', status: 'in-progress', priority: 'medium', description: 'Buttons, inputs, modais.', dependencies: ['t1'] },
+        { id: 't3', title: 'Integração i18n', status: 'done', priority: 'low', description: 'Português e Inglês.', dependencies: ['t2'] },
+      ]);
     } else {
-      setTasks(mockTasks)
+      setTasks([]);
     }
-    
     if (savedColumns) {
-      setColumns(JSON.parse(savedColumns))
+      setColumns(JSON.parse(savedColumns));
+    } else if (board.name.toLowerCase() === 'teste') {
+      setColumns(defaultColumns);
     }
-  }, [])
+  }, [boardId, navigate]);
 
   useEffect(() => {
-    if (tasks.length > 0) {
-      localStorage.setItem('kanban-tasks', JSON.stringify(tasks))
-    }
-  }, [tasks])
+    if (!boardId) return;
+    localStorage.setItem(`kanban-tasks:${boardId}`, JSON.stringify(tasks));
+  }, [tasks, boardId]);
 
   useEffect(() => {
-    localStorage.setItem('kanban-columns', JSON.stringify(columns))
-  }, [columns])
+    if (!boardId) return;
+    localStorage.setItem(`kanban-columns:${boardId}`, JSON.stringify(columns));
+  }, [columns, boardId]);
+
+  useEffect(() => {
+    const key = `tour-tasks-done:${boardId}`;
+    if (!boardId || localStorage.getItem(key)) return;
+    const d = driver({
+      showProgress: true,
+      steps: [
+        { element: 'body', popover: { title: 'Board', description: 'Aqui você gerencia suas tarefas.' } },
+        { element: '[data-tour="tabs"]', popover: { title: 'Vistas', description: 'Alterne entre Kanban e Fluxo.' } },
+        { element: '[data-tour="create-task"]', popover: { title: 'Nova tarefa', description: 'Crie uma tarefa neste board.' } },
+      ],
+      onDestroyed: () => localStorage.setItem(key, '1')
+    });
+    d.drive();
+  }, [boardId]);
 
   const updateTask = (updatedTask: Task) => {
-    setTasks(prev => prev.map(task => 
+    setTasks(prev => prev.map(task =>
       task.id === updatedTask.id ? updatedTask : task
-    ))
-  }
+    ));
+  };
 
   const updateTasks = (updatedTasks: Task[]) => {
-    setTasks(updatedTasks)
-  }
+    setTasks(updatedTasks);
+  };
 
   const deleteTask = (taskId: string) => {
-    setTasks(prev => prev.filter(t => t.id !== taskId))
-  }
+    setTasks(prev => prev.filter(t => t.id !== taskId));
+  };
 
   const openCreateForStatus = (status: Task['status']) => {
-    setEditingTask({ id: '', title: '', status, priority: 'medium' })
-    setIsTaskModalOpen(true)
-  }
+    setEditingTask({ id: '', title: '', status, priority: 'medium' });
+    setIsTaskModalOpen(true);
+  };
 
   const openEditTask = (task: Task) => {
-    setEditingTask(task)
-    setIsTaskModalOpen(true)
-  }
+    setEditingTask(task);
+    setIsTaskModalOpen(true);
+  };
 
   const addColumn = (title: string) => {
-    const id = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+    const id = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
     const newColumn: KanbanColumn = {
       id,
       title,
       status: id
-    }
-    setColumns(prev => [...prev, newColumn])
-  }
+    };
+    setColumns(prev => [...prev, newColumn]);
+  };
 
   const renameColumn = (id: string, title: string) => {
-    setColumns(prev => prev.map(col => 
+    setColumns(prev => prev.map(col =>
       col.id === id ? { ...col, title } : col
-    ))
-  }
+    ));
+  };
 
   const deleteColumn = (id: string) => {
-    // Remove tasks from this column
-    setTasks(prev => prev.filter(task => task.status !== id))
-    // Remove the column
-    setColumns(prev => prev.filter(col => col.id !== id))
-  }
+    setTasks(prev => prev.filter(task => task.status !== id));
+    setColumns(prev => prev.filter(col => col.id !== id));
+  };
 
+  useEffect(() => {
+    const handler = (e: any) => {
+      setSearchQuery(String(e.detail || ''));
+    };
+    window.addEventListener('global-search', handler);
+    return () => window.removeEventListener('global-search', handler);
+  }, []);
 
   return (
-    <motion.div 
+    <motion.div
       className="space-y-6"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
     >
-      {/* Header with search and actions */}
-      <motion.div 
+      <motion.div
         className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <div className="flex-1 w-full">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="Buscar tarefas..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-            />
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          <motion.button
-            className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+        <div className="flex items-center gap-3 w-full">
+          <button
+            onClick={() => navigate('/boards')}
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
+            title="Voltar"
           >
-            <Filter className="w-4 h-4" />
-            <span className="text-sm font-medium">Filtros</span>
-          </motion.button>
-          
-          <motion.button
-            onClick={() => { setEditingTask(null); setIsTaskModalOpen(true) }}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <Plus className="w-4 h-4" />
-            <span className="text-sm font-medium">Nova Tarefa</span>
-          </motion.button>
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+          <h1 className="text-lg font-semibold truncate max-w-[60vw]">{workspaceName ? `${workspaceName} · ` : ''}{board?.name || ' '}</h1>
         </div>
+        <div className="flex-1 w-full" />
+
+
       </motion.div>
 
-   
 
-      {/* View Tabs */}
-      <motion.div 
+
+      <motion.div
         className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl w-fit"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
+        data-tour="tabs"
       >
         {[
           { id: 'kanban', icon: Kanban, label: 'Kanban' },
@@ -184,7 +212,7 @@ const TasksPage = () => {
       </motion.div>
 
 
-      <div className="relative min-h-[600px]">
+      <div className="relative min-h-[600px] overflow-x-auto">
         <AnimatePresence mode="wait">
           {currentView === 'kanban' && (
             <motion.div
@@ -194,7 +222,7 @@ const TasksPage = () => {
               exit={{ opacity: 0, x: 50 }}
               transition={{ duration: 0.4, type: "spring", stiffness: 100 }}
             >
-              <KanbanView 
+              <KanbanView
                 tasks={filteredTasks}
                 columns={columns}
                 onUpdateTask={updateTask}
@@ -208,7 +236,6 @@ const TasksPage = () => {
               />
             </motion.div>
           )}
-          
           {currentView === 'flow' && (
             <motion.div
               key="flow"
@@ -217,8 +244,8 @@ const TasksPage = () => {
               exit={{ opacity: 0, x: -50 }}
               transition={{ duration: 0.4, type: "spring", stiffness: 100 }}
             >
-              <FlowView 
-                tasks={filteredTasks} 
+              <FlowView
+                tasks={filteredTasks}
                 onUpdateTask={updateTask}
                 onUpdateTasks={updateTasks}
               />
@@ -226,22 +253,23 @@ const TasksPage = () => {
           )}
         </AnimatePresence>
       </div>
-      
+
       <TaskModal
         isOpen={isTaskModalOpen}
         onClose={() => { setIsTaskModalOpen(false); setEditingTask(null) }}
         task={editingTask && editingTask.id ? editingTask : undefined}
         columns={columns}
+        defaultStatus={editingTask?.status}
         onSave={(saved) => {
           setTasks(prev => {
-            const exists = prev.some(t => t.id === saved.id)
-            return exists ? prev.map(t => (t.id === saved.id ? saved : t)) : [saved, ...prev]
-          })
+            const exists = prev.some(t => t.id === saved.id);
+            return exists ? prev.map(t => (t.id === saved.id ? saved : t)) : [saved, ...prev];
+          });
         }}
         onDelete={(id) => deleteTask(id)}
       />
     </motion.div>
-  )
-}
+  );
+};
 
-export default TasksPage
+export default TasksPage;

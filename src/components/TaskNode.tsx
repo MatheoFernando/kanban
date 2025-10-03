@@ -1,13 +1,10 @@
 import { Handle, Position } from '@xyflow/react'
-import type { NodeProps } from '@xyflow/react'
 import type { Task } from '../types/task'
 
-interface TaskNodeData {
-  task: Task
-}
+type TaskNodeData = { task: Task }
 
-const TaskNode = ({ data }: NodeProps<TaskNodeData>) => {
-  const { task } = data
+const TaskNode = ({ data }: any) => {
+  const task = (data as TaskNodeData)?.task as Task
 
   const getPriorityColor = (priority: Task['priority']) => {
     switch (priority) {

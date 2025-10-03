@@ -1,10 +1,8 @@
-import { motion } from 'framer-motion'
+// import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { 
-  Save, Trash2, Plus, X, Calendar, Tag, Users, 
-  Paperclip, CheckSquare, MessageSquare, Activity,
-  MoreHorizontal, Archive
+  Save, Trash2, Plus
 } from 'lucide-react'
 import type { Task } from '../types/task'
 import Modal from './ui/modal'
@@ -16,9 +14,10 @@ interface TaskModalProps {
   onSave: (task: Task) => void
   onDelete?: (taskId: string) => void
   columns?: Array<{ id: string; title: string; status: string }>
+  defaultStatus?: Task['status']
 }
 
-export const TaskModal = ({ isOpen, onClose, task, onSave, onDelete, columns = [] }: TaskModalProps) => {
+export const TaskModal = ({ isOpen, onClose, task, onSave, onDelete, columns = [], defaultStatus }: TaskModalProps) => {
   const { t } = useTranslation()
   const [formData, setFormData] = useState({
     id: '',
@@ -26,7 +25,8 @@ export const TaskModal = ({ isOpen, onClose, task, onSave, onDelete, columns = [
     description: '',
     status: 'todo' as Task['status'],
     priority: 'medium' as Task['priority'],
-    dependencies: [] as string[]
+    dependencies: [] as string[],
+    dueDate: '' as string
   })
 
   useEffect(() => {
@@ -37,19 +37,21 @@ export const TaskModal = ({ isOpen, onClose, task, onSave, onDelete, columns = [
         description: task.description || '',
         status: task.status,
         priority: task.priority,
-        dependencies: task.dependencies || []
+        dependencies: task.dependencies || [],
+        dueDate: task.dueDate || ''
       })
     } else {
       setFormData({
         id: Date.now().toString(),
         title: '',
         description: '',
-        status: 'todo',
+        status: (defaultStatus || 'todo') as Task['status'],
         priority: 'medium',
-        dependencies: []
+        dependencies: [],
+        dueDate: ''
       })
     }
-  }, [task, isOpen])
+  }, [task, isOpen, defaultStatus])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -62,7 +64,8 @@ export const TaskModal = ({ isOpen, onClose, task, onSave, onDelete, columns = [
       status: formData.status,
       priority: formData.priority,
       dependencies: formData.dependencies.length > 0 ? formData.dependencies : undefined,
-      position: task?.position || { x: Math.random() * 300, y: Math.random() * 200 }
+      position: task?.position || { x: Math.random() * 300, y: Math.random() * 200 },
+      dueDate: formData.dueDate || undefined
     }
 
     onSave(newTask)
@@ -79,109 +82,73 @@ export const TaskModal = ({ isOpen, onClose, task, onSave, onDelete, columns = [
   const isEditing = !!task
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={isEditing ? 'Editar Tarefa' : 'Nova Tarefa'}>
-        <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            Título *
-          </label>
-          <input
-            type="text"
-            value={formData.title}
-            onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-            className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-            placeholder="Digite o título da tarefa..."
-            required
-          />
-        </div>
+    <Modal isOpen={isOpen} onClose={onClose} title={isEditing ? 'Editar tarefa' : 'Criar tarefa'}>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <input
+          type="text"
+          value={formData.title}
+          onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+          className="w-full px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 border border-transparent focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 transition"
+          placeholder="Título da tarefa"
+          autoFocus
+          required
+        />
 
-        {/* Descrição */}
-        <div>
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            Descrição
-          </label>
-          <textarea
-            value={formData.description}
-            onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-            rows={4}
-            className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
-            placeholder="Descreva a tarefa..."
-          />
-        </div>
+        <textarea
+          value={formData.description}
+          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+          rows={4}
+          className="w-full px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 border border-transparent focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 transition resize-none"
+          placeholder="Descrição (opcional)"
+        />
 
-        {/* Status e Prioridade */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Status
-            </label>
-            <select
-              value={formData.status}
-              onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value }))}
-              className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              {columns.map(column => (
-                <option key={column.id} value={column.status}>
-                  {column.title}
-                </option>
-              ))}
-            </select>
+        <div className="flex flex-wrap items-center gap-3">
+          <select
+            value={formData.status}
+            onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value }))}
+            className="px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800"
+          >
+            {columns.map(column => (
+              <option key={column.id} value={column.status}>{column.title}</option>
+            ))}
+          </select>
+
+          <div className="flex items-center gap-2">
+            {[{id:'low',lbl:t('priority.low')},{id:'medium',lbl:t('priority.medium')},{id:'high',lbl:t('priority.high')}].map(p => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => setFormData(prev => ({ ...prev, priority: p.id as Task['priority'] }))}
+                className={`px-3 py-1.5 rounded-full text-xs border ${formData.priority===p.id ? 'bg-blue-600 text-white border-blue-600' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-300 dark:border-slate-700'}`}
+              >{p.lbl}</button>
+            ))}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Prioridade
-            </label>
-            <select
-              value={formData.priority}
-              onChange={(e) => setFormData(prev => ({ ...prev, priority: e.target.value as Task['priority'] }))}
-              className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="low">{t('priority.low')}</option>
-              <option value="medium">{t('priority.medium')}</option>
-              <option value="high">{t('priority.high')}</option>
-            </select>
+          <div className="ml-auto">
+            <label className="text-xs block mb-1">Data</label>
+            <input
+              type="date"
+              value={formData.dueDate}
+              onChange={(e) => setFormData(prev => ({ ...prev, dueDate: e.target.value }))}
+              className="px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800"
+            />
           </div>
         </div>
 
-        {/* Botões */}
-        <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-700">
+        <div className="flex items-center justify-between pt-2">
           {isEditing && onDelete && (
-            <motion.button
-              type="button"
-              onClick={handleDelete}
-              className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Trash2 className="w-4 h-4" />
-              Deletar
-            </motion.button>
+            <button type="button" onClick={handleDelete} className="text-red-600 text-sm inline-flex items-center gap-2">
+              <Trash2 className="w-4 h-4" /> Excluir
+            </button>
           )}
-          
-          <div className="flex items-center gap-3 ml-auto">
-            <motion.button
-              type="button"
-              onClick={onClose}
-              className="px-6 py-2 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              {t('cancel')}
-            </motion.button>
-            
-            <motion.button
-              type="submit"
-              className="flex items-center gap-2 px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              {isEditing ? <Save className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-              {isEditing ? 'Salvar' : 'Criar'}
-            </motion.button>
+          <div className="ml-auto flex items-center gap-2">
+            <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg bg-slate-200 dark:bg-slate-700 text-sm">Cancelar</button>
+            <button type="submit" className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm inline-flex items-center gap-2">
+              {isEditing ? <Save className="w-4 h-4" /> : <Plus className="w-4 h-4" />} {isEditing ? 'Salvar' : 'Criar'}
+            </button>
           </div>
         </div>
-        </form>
+      </form>
     </Modal>
   )
 }

@@ -1,0 +1,111 @@
+{
+  "appName": "Kanban",
+  "switchToLight": "Switch to light mode",
+  "switchToDark": "Switch to dark mode",
+  "boards": "Boards",
+  "searchBoardsAndTasks": "Search boards and tasks...",
+  "create": "Create",
+  "createBoard": "Create new board",
+  "boardName": "Board name",
+  "boardDescription": "Description (optional)",
+  "boardIcon": "Icon:",
+  "createWorkspace": "Create new workspace",
+  "workspaceName": "Workspace name",
+  "deleteWorkspace": "Delete workspace?",
+  "deleteWorkspaceConfirmation": "\"{{name}}\" will be deleted. The boards will be moved to another workspace.",
+  "loading": "Loading...",
+  "error": "Error",
+  "save": "Save",
+  "cancel": "Cancel",
+  "edit": "Edit",
+  "delete": "Delete",
+  "add": "Add",
+  "rename": "Rename",
+  "remove": "Remove",
+  "header": {
+    "switchToLight": "Switch to light mode",
+    "switchToDark": "Switch to dark mode",
+    "boards": "Boards",
+    "searchBoardsAndTasks": "Search boards and tasks...",
+    "create": "Create",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "navigation": "Navigation"
+  },
+  "navigation": {
+    "home": "Home",
+    "createWorkspace": "Create workspace",
+    "workspaces": "Workspaces",
+    "noWorkspaces": "No workspaces"
+  },
+  "views": {
+    "kanbanView": "Kanban",
+    "flowView": "Flow"
+  },
+  "priority": {
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low"
+  },
+  "status": {
+    "todo": "To Do",
+    "in-progress": "In Progress",
+    "done": "Done"
+  },
+  "columns": {
+    "todo": "To Do",
+    "inProgress": "In Progress",
+    "done": "Done"
+  },
+  "tasks": {
+    "dependencies": "dependency",
+    "dependenciesPlural": "dependencies",
+    "noDependencies": "No dependencies",
+    "noDueDate": "No due date"
+  },
+  "modals": {
+    "createBoard": "Create new board",
+    "boardName": "Board name",
+    "boardDescription": "Description (optional)",
+    "boardIcon": "Icon:",
+    "createWorkspace": "Create new workspace",
+    "workspaceName": "Workspace name",
+    "deleteWorkspace": "Delete workspace?",
+    "deleteWorkspaceConfirmation": "\"{{name}}\" will be deleted. The boards will be moved to another workspace.",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "add": "Add",
+    "rename": "Rename",
+    "remove": "Remove"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error"
+  },
+  "languages": {
+    "pt": "Português",
+    "en": "English"
+  },
+  "searchDialog": {
+    "placeholder": "Search boards and tasks...",
+    "nothingFound": "Nothing found",
+    "boardsHeading": "Boards",
+    "tasksHeading": "Tasks"
+  },
+  "tour": {
+    "start": "Welcome! Let's explore the app.",
+    "logo": "Click to go back to boards.",
+    "menuButton": "Open the menu to navigate on mobile.",
+    "navigation": "Here you find navigation.",
+    "home": "Quick access to the boards page.",
+    "createWorkspace": "Create a new workspace here.",
+    "language": "Change the language here.",
+    "theme": "Toggle between light and dark.",
+    "createBoard": "Create new boards here.",
+    "search": "Search boards and tasks here."
+  }
+}
+
+

@@ -1,0 +1,46 @@
+:root {
+  --driver-bg-color: #0f172a;
+  --driver-fg-color: #f8fafc;
+  --driver-popover-bg-color: #1e293b;
+  --driver-popover-fg-color: #f8fafc;
+  --driver-popover-border-color: #334155;
+  --driver-popover-arrow-color: #1e293b;
+  --driver-popover-box-shadow: 0 0 0 2px var(--driver-popover-border-color);
+}
+
+.driver-popover {
+  border-radius: 0.75rem;
+}
+
+.driver-popover-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.driver-popover-description {
+  font-size: 1rem;
+}
+
+.driver-popover-close-btn {
+  color: #94a3b8;
+}
+
+.driver-popover-close-btn:hover {
+  color: #f8fafc;
+}
+
+.driver-popover-arrow-side-left .driver-popover-arrow {
+  background-color: var(--driver-popover-arrow-color);
+}
+
+.driver-popover-arrow-side-right .driver-popover-arrow {
+  background-color: var(--driver-popover-arrow-color);
+}
+
+.driver-popover-arrow-side-top .driver-popover-arrow {
+  background-color: var(--driver-popover-arrow-color);
+}
+
+.driver-popover-arrow-side-bottom .driver-popover-arrow {
+  background-color: var(--driver-popover-arrow-color);
+}

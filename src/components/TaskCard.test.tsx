@@ -1,7 +1,16 @@
-import { render, screen, fireEvent } from '@testing-library/react'
-import { DndContext } from '@dnd-kit/core'
-import TaskCard from './TaskCard'
-import type { Task } from '../types/task'
+import { render, screen, fireEvent } from '@testing-library/react';
+import { DndContext } from '@dnd-kit/core';
+import TaskCard from './TaskCard';
+import type { Task } from '../types/task';
+
+jest.mock('../i18n', () => ({
+  useTranslation: () => ({
+    t: (str) => str,
+    i18n: {
+      changeLanguage: () => new Promise(() => {}),
+    },
+  }),
+}));
 
 const mockTask: Task = {
   id: '1',
@@ -10,45 +19,45 @@ const mockTask: Task = {
   status: 'todo',
   priority: 'high',
   dependencies: ['2']
-}
+};
 
 const renderWithDnd = (task: Task, props = {}) => {
   return render(
     <DndContext>
       <TaskCard task={task} {...props} />
     </DndContext>
-  )
-}
+  );
+};
 
 test('renders task title and description', () => {
-  renderWithDnd(mockTask)
-  
-  expect(screen.getByText('Test Task')).toBeInTheDocument()
-  expect(screen.getByText('Test description')).toBeInTheDocument()
-})
+  renderWithDnd(mockTask);
+
+  expect(screen.getByText('Test Task')).toBeInTheDocument();
+  expect(screen.getByText('Test description')).toBeInTheDocument();
+});
 
 test('renders priority badge', () => {
-  renderWithDnd(mockTask)
-  
-  expect(screen.getByText('Alta')).toBeInTheDocument()
-})
+  renderWithDnd(mockTask);
+
+  expect(screen.getByText('priority.high')).toBeInTheDocument();
+});
 
 test('calls onEdit when edit button is clicked', () => {
-  const mockOnEdit = jest.fn()
-  renderWithDnd(mockTask, { onEdit: mockOnEdit })
-  
-  const editButton = screen.getByTitle('Editar')
-  fireEvent.click(editButton)
-  
-  expect(mockOnEdit).toHaveBeenCalledWith(mockTask)
-})
+  const mockOnEdit = jest.fn();
+  renderWithDnd(mockTask, { onEdit: mockOnEdit });
+
+  const editButton = screen.getByTitle('Editar');
+  fireEvent.click(editButton);
+
+  expect(mockOnEdit).toHaveBeenCalledWith(mockTask);
+});
 
 test('calls onDelete when delete button is clicked', () => {
-  const mockOnDelete = jest.fn()
-  renderWithDnd(mockTask, { onDelete: mockOnDelete })
-  
-  const deleteButton = screen.getByTitle('Deletar')
-  fireEvent.click(deleteButton)
-  
-  expect(mockOnDelete).toHaveBeenCalledWith('1')
-})
+  const mockOnDelete = jest.fn();
+  renderWithDnd(mockTask, { onDelete: mockOnDelete });
+
+  const deleteButton = screen.getByTitle('Deletar');
+  fireEvent.click(deleteButton);
+
+  expect(mockOnDelete).toHaveBeenCalledWith('1');
+});

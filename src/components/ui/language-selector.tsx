@@ -10,7 +10,7 @@ const languages = [
 ]
 
 export const LanguageSelector = () => {
-  const { i18n, t } = useTranslation()
+  const { i18n } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
 
   const currentLanguage = languages.find(lang => 

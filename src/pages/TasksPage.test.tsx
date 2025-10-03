@@ -1,17 +1,25 @@
-import { render, screen } from '@testing-library/react'
-import { BrowserRouter } from 'react-router-dom'
-import TasksPage from './TasksPage'
+import { render, screen } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
+import TasksPage from './TasksPage';
 
-const renderPage = () => render(
-  <BrowserRouter>
-    <TasksPage />
-  </BrowserRouter>
-)
+jest.mock('../i18n', () => ({
+  useTranslation: () => ({
+    t: (str) => str,
+    i18n: {
+      changeLanguage: () => new Promise(() => {}),
+    },
+  }),
+}));
 
-test('render page title', () => {
-  renderPage()
-  expect(screen.getByText(/Gestão de Tarefas/i)).toBeInTheDocument()
-})
+const renderPage = () =>
+  render(
+    <BrowserRouter>
+      <TasksPage />
+    </BrowserRouter>
+  );
 
+test('renders tasks page', () => {
+  renderPage();
 
-
+  expect(screen.getByText('Kanban')).toBeInTheDocument();
+});
