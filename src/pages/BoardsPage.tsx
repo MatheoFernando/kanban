@@ -132,6 +132,48 @@ export default function BoardsPage() {
                   <button onClick={() => navigate(`/w/${ws.id}/boards`)} className="text-sm px-3 py-1.5 rounded border border-slate-200 dark:border-slate-700">Ver todos</button>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {wsBoards.length === 0 && (
+                    <div className="group relative p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:shadow-md transition">
+                      <button
+                        onClick={() => {
+                          const existing = getBoards().find(b => b.id === 'teste' && b.workspaceId === ws.id)
+                          const board = existing || createBoard('Teste', 'work', 'Board de testes com tarefas de exemplo', '🧪', ws.id)
+                          const boardsAll = getBoards().map(b => (b.id === board.id ? { ...b, pinned: true } : b))
+                          saveBoards(boardsAll)
+                          const tKey = storageKeyForTasks(board.id)
+                          const cKey = storageKeyForColumns(board.id)
+                          try {
+                            const cur = JSON.parse(localStorage.getItem(tKey) || '[]')
+                            if (!Array.isArray(cur) || cur.length === 0) {
+                              localStorage.setItem(tKey, JSON.stringify([
+                                { id: 't1', title: 'Configurar projeto', status: 'todo', priority: 'high', description: 'Inicializar repositório e configurações básicas.' },
+                                { id: 't2', title: 'Criar componentes UI', status: 'in-progress', priority: 'medium', description: 'Buttons, inputs, modais.', dependencies: ['t1'] },
+                                { id: 't3', title: 'Integração i18n', status: 'done', priority: 'low', description: 'Português e Inglês.', dependencies: ['t2'] },
+                              ]))
+                            }
+                          } catch {}
+                          try {
+                            const curC = JSON.parse(localStorage.getItem(cKey) || 'null')
+                            if (!curC) {
+                              localStorage.setItem(cKey, JSON.stringify([
+                                { id: 'todo', title: 'A Fazer', status: 'todo' },
+                                { id: 'in-progress', title: 'Em Progresso', status: 'in-progress' },
+                                { id: 'done', title: 'Concluído', status: 'done' }
+                              ]))
+                            }
+                          } catch {}
+                          navigate(`/w/${ws.id}/boards/${board.id}`)
+                        }}
+                        className="flex items-center gap-3 w-full text-left"
+                      >
+                        <div className="h-10 w-14 rounded bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center text-white">🧪</div>
+                        <div className="min-w-0">
+                          <div className="font-medium truncate">Teste</div>
+                          <div className="text-xs text-slate-500 truncate">Criar board de testes com tarefas</div>
+                        </div>
+                      </button>
+                    </div>
+                  )}
                   {wsBoards.map((b: Board) => (
                     <div key={b.id} className="group relative p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:shadow-md transition">
                       <Link to={`/w/${ws.id}/boards/${b.id}`} className="flex items-center gap-3">

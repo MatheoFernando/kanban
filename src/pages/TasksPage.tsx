@@ -44,7 +44,8 @@ const TasksPage = () => {
       return;
     }
     const board = getBoardById(boardId);
-    if (!board) {
+    const isTest = boardId === 'teste' || (board?.name && board.name.toLowerCase() === 'teste');
+    if (!board && !isTest) {
       navigate('/boards', { replace: true });
       return;
     }
@@ -55,7 +56,7 @@ const TasksPage = () => {
     const parsedTasks = savedTasks ? JSON.parse(savedTasks) : undefined;
     if (parsedTasks && Array.isArray(parsedTasks) && parsedTasks.length > 0) {
       setTasks(parsedTasks);
-    } else if (board.name.toLowerCase() === 'teste') {
+    } else if (isTest) {
       setTasks([
         { id: 't1', title: 'Configurar projeto', status: 'todo', priority: 'high', description: 'Inicializar repositório e configurações básicas.' },
         { id: 't2', title: 'Criar componentes UI', status: 'in-progress', priority: 'medium', description: 'Buttons, inputs, modais.', dependencies: ['t1'] },
@@ -66,7 +67,7 @@ const TasksPage = () => {
     }
     if (savedColumns) {
       setColumns(JSON.parse(savedColumns));
-    } else if (board.name.toLowerCase() === 'teste') {
+    } else if (isTest) {
       setColumns(defaultColumns);
     }
   }, [boardId, navigate]);
