@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import type { ReactNode } from 'react';
 import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { ensureBoardsSeeded, migrateBoardsToDefaultWorkspace, cleanupExampleBoards } from '../lib/boards';
 import { ensureWorkspacesSeeded, deleteWorkspace } from '../lib/workspaces';
@@ -16,7 +15,6 @@ interface LayoutProps {
 }
 
 const Layout = ({ children }: LayoutProps) => {
-  const { t } = useTranslation();
   const [createOpen, setCreateOpen] = useState(false);
   const [createWsOpen, setCreateWsOpen] = useState(false);
   const [confirmDel, setConfirmDel] = useState<{ id: string; name: string } | null>(null);
