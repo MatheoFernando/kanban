@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Moon, Sun, Menu, FolderPlus, Search, ArrowLeft, X } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { LanguageSelector } from './ui/language-selector';
 import { Sheet, SheetContent, SheetHeader, SheetDescription, SheetTrigger } from './ui/sheet';
@@ -11,6 +11,7 @@ import { LeftSidebar } from './LeftSidebar';
 import { CreateBoardModal } from './CreateBoardModal';
 
 export const Header = () => {
+  const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const { t } = useTranslation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -27,6 +28,16 @@ export const Header = () => {
       <div className="px-4 sm:px-6">
         <div className="flex justify-between items-center h-16 w-full">
           <div className="flex items-center gap-4 ">
+            <motion.button
+              onClick={() => navigate(-1)}
+              className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              aria-label="Voltar"
+              title="Voltar"
+            >
+              <ArrowLeft className="w-6 h-6" />
+            </motion.button>
             <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
               <SheetTrigger>
                 <motion.button
