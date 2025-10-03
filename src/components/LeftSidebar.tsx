@@ -74,7 +74,16 @@ export function LeftSidebar({ onOpenCreateWs, isMobile = false }: { onOpenCreate
               );
             })}
             {visibleWorkspaces.length === 0 && (
-              <li className="px-3 py-4 text-center text-sm text-slate-500">{t('navigation.noWorkspaces')}</li>
+              <>
+                <li>
+                  <button
+                    onClick={() => navigate('/w/wokhop-team-front-end/boards')}
+                    className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-left transition border-l-2 border-transparent hover:border-blue-500 hover:bg-slate-50 dark:hover:bg-slate-800`}
+                  >
+                    <span className="font-medium text-sm truncate">Wokhop Team Front-end</span>
+                  </button>
+                </li>
+              </>
             )}
           </ul>
         </div>

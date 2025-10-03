@@ -77,7 +77,10 @@ export function ensureBoardsSeeded(): void {
     const boards = getBoards()
     const hasTest = boards.some(b => b.name === 'Teste' && b.workspaceId === wsId)
     if (!hasTest) {
-      createBoard('Teste', 'work', 'Board de testes com tarefas de exemplo', '🧪', wsId)
+      const created = createBoard('Teste', 'work', 'Board de testes com tarefas de exemplo', '🧪', wsId)
+      // Fixar (pinned) o board de teste por padrão
+      const updated = getBoards().map(b => (b.id === created.id ? { ...b, pinned: true } : b))
+      saveBoards(updated)
     }
   } catch {}
 }

@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import TasksPage from './pages/TasksPage';
 import BoardsPage from './pages/BoardsPage';
 import Layout from './components/Layout';
@@ -10,6 +10,7 @@ import { ensureWorkspacesSeeded, getWorkspaces } from './lib/workspaces';
 
 function App() {
   const navigate = useNavigate();
+  const location = useLocation();
   useEffect(() => {
     const driverObj = driver();
     driverObj.drive();
@@ -45,6 +46,16 @@ function App() {
       localStorage.setItem(firstKey, '1');
     }
   }, [navigate]);
+
+  useEffect(() => {
+    // After first run, default to the first workspace boards when hitting root
+    if (location.pathname === '/') {
+      const ws = getWorkspaces()[0];
+      if (ws) {
+        navigate(`/w/${ws.id}/boards`, { replace: true });
+      }
+    }
+  }, [location.pathname, navigate]);
 
   return (
     <Layout>

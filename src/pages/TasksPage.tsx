@@ -21,7 +21,7 @@ const TasksPage = () => {
   const navigate = useNavigate();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [columns, setColumns] = useState<KanbanColumn[]>(defaultColumns);
-  const [currentView, setCurrentView] = useState<ViewMode>('flow');
+  const [currentView, setCurrentView] = useState<ViewMode>('kanban');
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
