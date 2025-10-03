@@ -98,7 +98,7 @@ const TaskCard = ({ task, isDragging = false, index = 0, onEdit, onDelete }: Tas
               </Tooltip>
             </div>
 
-            <div className="flex items-center gap-1 ml-2">
+              <div className="flex items-center gap-1 ml-2 opacity-100 sm:opacity-100">
               <motion.span
                 className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium border ${getPriorityColor(task.priority)}`}
                 initial={{ scale: 0 }}
@@ -108,7 +108,7 @@ const TaskCard = ({ task, isDragging = false, index = 0, onEdit, onDelete }: Tas
                 {getPriorityLabel(task.priority)}
               </motion.span>
 
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
                 {onEdit && (
                   <motion.button
                     onClick={(e) => {
