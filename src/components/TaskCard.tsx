@@ -58,7 +58,9 @@ const TaskCard = ({ task, isDragging = false, index = 0, onEdit, onDelete }: Tas
     <TooltipProvider>
       <motion.div
         ref={setNodeRef}
-        style={{ ...style, touchAction: 'manipulation' as any }}
+        style={style}
+        {...attributes}
+        {...listeners}
         layout
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -83,16 +85,7 @@ const TaskCard = ({ task, isDragging = false, index = 0, onEdit, onDelete }: Tas
         >
           <div className="flex items-start justify-between mb-2">
             <div className="flex items-start gap-2 flex-1 min-w-0">
-              {/* Drag handle - keeps buttons tappable */}
-              <button
-                className="cursor-grab active:cursor-grabbing p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700"
-                {...listeners}
-                {...attributes}
-                onClick={(e) => e.preventDefault()}
-                aria-label="Arrastar"
-              >
-                {getStatusIcon(task.status)}
-              </button>
+              {getStatusIcon(task.status)}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <h4 className="font-semibold text-slate-900 dark:text-white leading-tight text-sm truncate" title={task.title}>
@@ -105,7 +98,7 @@ const TaskCard = ({ task, isDragging = false, index = 0, onEdit, onDelete }: Tas
               </Tooltip>
             </div>
 
-              <div className="flex items-center gap-1 ml-2 opacity-100 sm:opacity-100">
+              <div className="flex items-center gap-1 ml-2">
               <motion.span
                 className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium border ${getPriorityColor(task.priority)}`}
                 initial={{ scale: 0 }}
@@ -115,9 +108,13 @@ const TaskCard = ({ task, isDragging = false, index = 0, onEdit, onDelete }: Tas
                 {getPriorityLabel(task.priority)}
               </motion.span>
 
-              <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
+              <div className="flex items-center gap-1 opacity-100 transition-opacity duration-200">
                 {onEdit && (
                   <motion.button
+                    type="button"
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onTouchStart={(e) => e.stopPropagation()}
                     onClick={(e) => {
                       e.stopPropagation();
                       onEdit(task);
@@ -132,6 +129,10 @@ const TaskCard = ({ task, isDragging = false, index = 0, onEdit, onDelete }: Tas
                 )}
                 {onDelete && (
                   <motion.button
+                    type="button"
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onTouchStart={(e) => e.stopPropagation()}
                     onClick={(e) => {
                       e.stopPropagation();
                       onDelete(task.id);

@@ -1,4 +1,4 @@
-import { DndContext, DragOverlay, PointerSensor, TouchSensor, useSensor, useSensors, closestCorners } from '@dnd-kit/core';
+import { DndContext, DragOverlay, PointerSensor, TouchSensor, useSensor, useSensors, closestCenter } from '@dnd-kit/core';
 import type { DragEndEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { useState } from 'react';
@@ -103,7 +103,7 @@ const KanbanView = ({ tasks, columns, onUpdateTask, onUpdateTasks, onDeleteTask,
   };
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
+    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
       <div className="flex gap-4 lg:gap-6 pb-4 overflow-x-auto">
         {columns.map((column) => (
           <div key={column.id} className="w-full md:w-80 flex-shrink-0">
