@@ -4,8 +4,6 @@ import { Kanban, GitBranch, ArrowLeft } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import KanbanView from '../components/KanbanView.tsx';
 import FlowView from '../components/FlowView.tsx';
-import { driver } from 'driver.js';
-import 'driver.js/dist/driver.css';
 import { TaskModal } from '../components/TaskModal';
 import type { Task, ViewMode, KanbanColumn } from '../types/task';
 const defaultColumns: KanbanColumn[] = [
@@ -82,21 +80,6 @@ const TasksPage = () => {
     if (!boardId) return;
     localStorage.setItem(`kanban-columns:${boardId}`, JSON.stringify(columns));
   }, [columns, boardId]);
-
-  useEffect(() => {
-    const key = `tour-tasks-done:${boardId}`;
-    if (!boardId || localStorage.getItem(key)) return;
-    const d = driver({
-      showProgress: true,
-      steps: [
-        { element: 'body', popover: { title: 'Board', description: 'Aqui você gerencia suas tarefas.' } },
-        { element: '[data-tour="tabs"]', popover: { title: 'Vistas', description: 'Alterne entre Kanban e Fluxo.' } },
-        { element: '[data-tour="create-task"]', popover: { title: 'Nova tarefa', description: 'Crie uma tarefa neste board.' } },
-      ],
-      onDestroyed: () => localStorage.setItem(key, '1')
-    });
-    d.drive();
-  }, [boardId]);
 
   const updateTask = (updatedTask: Task) => {
     setTasks(prev => prev.map(task =>

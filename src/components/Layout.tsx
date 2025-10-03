@@ -2,9 +2,6 @@ import { motion } from 'framer-motion';
 import type { ReactNode } from 'react';
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { driver } from 'driver.js';
-import 'driver.js/dist/driver.css';
-import '../styles/driver.css';
 import { useLocation } from 'react-router-dom';
 import { ensureBoardsSeeded, migrateBoardsToDefaultWorkspace, cleanupExampleBoards } from '../lib/boards';
 import { ensureWorkspacesSeeded, deleteWorkspace } from '../lib/workspaces';
@@ -38,34 +35,15 @@ const Layout = ({ children }: LayoutProps) => {
   useEffect(() => {
     const h = (e: any) => setConfirmDel({ id: e.detail.id, name: e.detail.name });
     (window as any).addEventListener('open-delete-workspace', h);
-    return () => (window as any).removeEventListener('open-delete-workspace', h);
+    const hc = () => setCreateWsOpen(true)
+    ;(window as any).addEventListener('open-create-workspace', hc)
+    return () => {
+      (window as any).removeEventListener('open-delete-workspace', h)
+      ;(window as any).removeEventListener('open-create-workspace', hc)
+    }
   }, []);
 
-  useEffect(() => {
-    // Run guided tour only once per browser storage
-    const hasRun = localStorage.getItem('app_tour_done');
-    if (hasRun) return;
-    const d = driver({
-      showProgress: true,
-      nextBtnText: '→',
-      prevBtnText: '←',
-      doneBtnText: 'OK'
-    });
-    d.setSteps([
-      { element: 'body', popover: { title: t('appName'), description: t('tour.start') } },
-      { element: '[data-tour="logo"]', popover: { title: t('appName'), description: t('tour.logo') } },
-      { element: '[data-tour="menu-button"]', popover: { title: t('header.navigation'), description: t('tour.menuButton') } },
-      { element: '[data-tour="sidebar"]', popover: { title: t('header.navigation'), description: t('tour.navigation') } },
-      { element: '[data-tour="nav-home"]', popover: { title: t('navigation.home'), description: t('tour.home') } },
-      { element: '[data-tour="nav-create-workspace"]', popover: { title: t('navigation.createWorkspace'), description: t('tour.createWorkspace') } },
-      { element: '[data-tour="language"]', popover: { title: t('languages.en'), description: t('tour.language') } },
-      { element: '[data-tour="theme"]', popover: { title: t('header.switchToDark'), description: t('tour.theme') } },
-      { element: '[data-tour="create-board"]', popover: { title: t('modals.createBoard'), description: t('tour.createBoard') } },
-      { element: '[data-tour="search"]', popover: { title: t('header.searchBoardsAndTasks'), description: t('tour.search') } }
-    ]);
-    d.drive();
-    localStorage.setItem('app_tour_done', '1');
-  }, [t]);
+  // Tour removido para simplificar a aplicação
 
   const handleConfirmDelete = async () => {
     if (confirmDel) {

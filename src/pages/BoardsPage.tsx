@@ -47,7 +47,7 @@ export default function BoardsPage() {
                   {b.description && <div className="text-xs text-slate-500 truncate">{b.description}</div>}
                 </div>
               </Link>
-              <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+              <div className="absolute top-3 right-3 flex items-center gap-1 opacity-100 transition">
                 <button title={b.pinned ? 'Desafixar' : 'Fixar'} onClick={() => { togglePin(b.id); setVersion(v => v + 1) }} className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700">
                   {b.pinned ? <PinOff className="w-4 h-4" /> : <Pin className="w-4 h-4" />}
                 </button>
@@ -138,7 +138,7 @@ export default function BoardsPage() {
                           {b.description && <div className="text-xs text-slate-500 truncate">{b.description}</div>}
                         </div>
                       </Link>
-                      <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+                      <div className="absolute top-3 right-3 flex items-center gap-1 opacity-100 transition">
                         <button title={b.pinned ? 'Desafixar' : 'Fixar'} onClick={() => { togglePin(b.id); setVersion(v => v + 1) }} className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700">
                           {b.pinned ? <PinOff className="w-4 h-4" /> : <Pin className="w-4 h-4" />}
                         </button>

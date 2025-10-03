@@ -53,7 +53,13 @@ export const Header = () => {
                   </div>
                 </SheetHeader>
                 <div className="p-4 space-y-4">
-                  <LeftSidebar isMobile onOpenCreateWs={() => setSidebarOpen(false)} />
+                  <LeftSidebar
+                    isMobile
+                    onOpenCreateWs={() => {
+                      try { window.dispatchEvent(new Event('open-create-workspace')) } catch {}
+                      setSidebarOpen(false)
+                    }}
+                  />
                 </div>
               </SheetContent>
             </Sheet>

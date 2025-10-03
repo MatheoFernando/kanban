@@ -57,7 +57,7 @@ export function LeftSidebar({ onOpenCreateWs, isMobile = false }: { onOpenCreate
           </button>
         </nav>
         <div>
-          <div className="text-xs uppercase tracking-wide text-slate-500 mb-2">{t('navigation.workspaces')}</div>
+              <div className="text-xs uppercase tracking-wide text-slate-500 mb-2">{t('navigation.workspaces')}</div>
           <ul className="space-y-1">
             {visibleWorkspaces.map(ws => {
               const isActive = ws.id === activeWsId;
@@ -73,18 +73,7 @@ export function LeftSidebar({ onOpenCreateWs, isMobile = false }: { onOpenCreate
                 </li>
               );
             })}
-            {visibleWorkspaces.length === 0 && (
-              <>
-                <li>
-                  <button
-                    onClick={() => navigate('/w/wokhop-team-front-end/boards')}
-                    className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-left transition border-l-2 border-transparent hover:border-blue-500 hover:bg-slate-50 dark:hover:bg-slate-800`}
-                  >
-                    <span className="font-medium text-sm truncate">Wokhop Team Front-end</span>
-                  </button>
-                </li>
-              </>
-            )}
+            {visibleWorkspaces.length === 0 && null}
           </ul>
         </div>
       </div>
