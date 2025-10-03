@@ -58,9 +58,7 @@ const TaskCard = ({ task, isDragging = false, index = 0, onEdit, onDelete }: Tas
     <TooltipProvider>
       <motion.div
         ref={setNodeRef}
-        style={style}
-        {...attributes}
-        {...listeners}
+        style={{ ...style, touchAction: 'manipulation' as any }}
         layout
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -85,7 +83,16 @@ const TaskCard = ({ task, isDragging = false, index = 0, onEdit, onDelete }: Tas
         >
           <div className="flex items-start justify-between mb-2">
             <div className="flex items-start gap-2 flex-1 min-w-0">
-              {getStatusIcon(task.status)}
+              {/* Drag handle - keeps buttons tappable */}
+              <button
+                className="cursor-grab active:cursor-grabbing p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700"
+                {...listeners}
+                {...attributes}
+                onClick={(e) => e.preventDefault()}
+                aria-label="Arrastar"
+              >
+                {getStatusIcon(task.status)}
+              </button>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <h4 className="font-semibold text-slate-900 dark:text-white leading-tight text-sm truncate" title={task.title}>
